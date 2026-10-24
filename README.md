@@ -1,33 +1,38 @@
 # MLflow Study
 
-MLflow로 실험과 모델을 기록하고 조회하는 방법을 익힌 노트북 모음입니다. Iris 분류 예제로 학습 중 지표와 모델을 남기고, Client API로 실험 정보를 조회합니다.
+Iris 분류 예제로 MLflow의 실험 기록과 조회 방법을 공부한 노트북입니다. PyTorch 모델을 학습하면서 파라미터·학습 정확도·모델을 남기고, 기록된 모델을 지표 순서로 조회합니다.
 
-## 노트북
+## 들어 있는 내용
 
-| 파일 | 내용 |
+| 노트북 | 코드와 저장된 출력에서 확인한 내용 |
 | --- | --- |
-| [Deep_learning_quick_start.ipynb](Deep_learning_quick_start.ipynb) | PyTorch Iris 분류기 학습, 파라미터·정확도·모델 기록, 기록한 모델의 지표 비교 |
-| [using_the_mlflow_client_API.ipynb](using_the_mlflow_client_API.ipynb) | `MlflowClient` 연결과 실험 목록 조회 |
+| [Deep_learning_quick_start.ipynb](Deep_learning_quick_start.ipynb) | Iris 분류기 학습, 10 epoch 간격의 모델·지표 기록, 학습 정확도로 정렬한 모델 조회 |
+| [using_the_mlflow_client_API.ipynb](using_the_mlflow_client_API.ipynb) | `MlflowClient`로 실험 목록과 Default 실험의 이름·상태 조회 |
 
-분류 예제는 10 epoch마다 모델과 학습 데이터의 정확도를 기록합니다. 코드는 train/test로 데이터를 나누지만, 현재 모델 순위에는 학습 정확도를 사용합니다. 이 값을 독립 test 성능으로 보지는 않습니다.
+첫 노트북은 train/test 데이터를 나누지만, 정확도 계산과 모델 비교에는 train 데이터만 사용합니다. 저장된 출력은 당시 실행 기록이며, 이번 문서 정리에서 학습을 다시 실행한 결과는 아닙니다.
+
+모델 배포, Model Registry 등록·승격, 여러 실험의 자동 비교는 구현 범위에 포함되지 않습니다.
+
+## 읽는 순서
+
+1. `IrisClassifier`와 데이터 준비 셀
+2. `mlflow.start_run()` 안의 학습·기록 루프
+3. `mlflow.search_logged_models()`를 이용한 조회
+4. Client API 노트북의 실험 목록 조회
 
 ## 실행 준비
 
-Python 가상환경에 필요한 패키지를 설치하고 JupyterLab에서 노트북을 엽니다. 모델 기록과 검색에는 MLflow 3 계열 API를 사용합니다.
+모델 기록·검색 코드는 MLflow 3 계열 API를 사용합니다. 의존성 버전이 고정돼 있지 않아 현재 환경에서의 전체 재실행은 별도 확인이 필요합니다.
 
 ```bash
 python -m pip install "mlflow>=3,<4" torch pandas scikit-learn jupyterlab
 python -m jupyterlab
 ```
 
-Client 예제는 `http://127.0.0.1:5001`의 tracking server에 연결합니다. 별도 터미널에서 아래처럼 서버를 실행하거나, 노트북의 `tracking_uri`를 사용 중인 주소로 바꿉니다.
+Client 노트북은 `http://127.0.0.1:5001`에 연결합니다. 해당 주소에 서버가 없으면 별도 터미널에서 실행하거나 `tracking_uri`를 바꿉니다.
 
 ```bash
 mlflow server --host 127.0.0.1 --port 5001
 ```
 
-학습 예제에는 tracking URI 지정이 없으므로 MLflow의 기본 설정을 사용합니다. 두 노트북이 같은 서버를 사용하게 하려면 학습 전에 `mlflow.set_tracking_uri("http://127.0.0.1:5001")`를 지정합니다.
-
-## 다음에 확인할 것
-
-의존성 버전을 고정한 실행 환경은 아직 없습니다. 다음에는 test 데이터 평가와 실행별 설정 비교를 추가해, 기록한 모델을 어떤 기준으로 선택할지까지 정리하려고 합니다.
+학습 노트북에는 tracking URI 지정이 없습니다. 두 노트북을 같은 서버에 연결하려면 학습 전에 `mlflow.set_tracking_uri("http://127.0.0.1:5001")`를 지정해야 합니다.
